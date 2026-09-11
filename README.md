@@ -1,248 +1,268 @@
+# Towards Generalizable and Robust Virtual Staining via Causal Intervention
 
-<img src='imgs/horse2zebra.gif' align="right" width=384>
+Official implementation of **"Towards Generalizable and Robust Virtual Staining via Causal Intervention"**.
 
-<br><br><br>
+> **Paper:** Towards Generalizable and Robust Virtual Staining via Causal Intervention  
+> **Authors:** Weiping Lin, Baoshun Wang, Yihuang Hu, Runchen Zhu, Liansheng Wang  
+> **Affiliation:** Xiamen University, China
 
-# CycleGAN and pix2pix in PyTorch
+---
 
-**New**:  Please check out [img2img-turbo](https://github.com/GaParmar/img2img-turbo) repo that includes both pix2pix-turbo and CycleGAN-Turbo. Our new one-step image-to-image translation methods can support both paired and unpaired training and produce better results by leveraging the pre-trained StableDiffusion-Turbo model. The inference time for 512x512 image is 0.29 sec on A6000 and 0.11 sec on A100.
+## Overview
 
-Please check out [contrastive-unpaired-translation](https://github.com/taesungp/contrastive-unpaired-translation) (CUT), our new unpaired image-to-image translation model that enables fast and memory-efficient training.
+Virtual staining is an image-to-image translation technique that generates digitally stained pathology images from unstained or differently processed tissue images. Although recent virtual staining methods can achieve high-quality results under specific experimental settings, their performance may degrade when applied to unseen datasets, different staining conditions, or other real-world variations.
 
-We provide PyTorch implementations for both unpaired and paired image-to-image translation.
+A key challenge is that virtual staining models may learn **spurious correlations** from diagnosis-irrelevant factors, such as staining variability, scanner characteristics, demographic biases, and other dataset-specific variations. These factors can cause the model to rely on non-causal information and consequently reduce its generalization and robustness.
 
-The code was written by [Jun-Yan Zhu](https://github.com/junyanz) and [Taesung Park](https://github.com/taesungp), and supported by [Tongzhou Wang](https://github.com/SsnL).
+In this work, we propose a **causal intervention-based training framework** for virtual staining. From a causal perspective, pathological image features are considered to contain both diagnosis-relevant components and diagnosis-irrelevant components. Our framework introduces a unified strategy to identify diagnosis-irrelevant features through a **confounder space classifier**, and then performs causal intervention during virtual staining training to suppress these spurious features.
 
-This PyTorch implementation produces results comparable to or better than our original Torch software. If you would like to reproduce the same results as in the papers, check out the original [CycleGAN Torch](https://github.com/junyanz/CycleGAN) and [pix2pix Torch](https://github.com/phillipi/pix2pix) code in Lua/Torch.
+The proposed framework is **model-agnostic** and can be integrated into existing virtual staining models in a plug-and-play manner.
 
-**Note**: The current software works well with PyTorch 1.4. Check out the older [branch](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/tree/pytorch0.3.1) that supports PyTorch 0.1-0.3.
+We evaluate the proposed method on five datasets covering two clinically relevant virtual staining tasks:
 
-You may find useful information in [training/test tips](docs/tips.md) and [frequently asked questions](docs/qa.md). To implement custom models and datasets, check out our [templates](#custom-model-and-dataset). To help users better understand and adapt our codebase, we provide an [overview](docs/overview.md) of the code structure of this repository.
+- **H&E-to-IHC**
+- **FFPE-to-H&E**
 
-**CycleGAN: [Project](https://junyanz.github.io/CycleGAN/) |  [Paper](https://arxiv.org/pdf/1703.10593.pdf) |  [Torch](https://github.com/junyanz/CycleGAN) |
-[Tensorflow Core Tutorial](https://www.tensorflow.org/tutorials/generative/cyclegan) | [PyTorch Colab](https://colab.research.google.com/github/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/CycleGAN.ipynb)**
+Experiments demonstrate improved virtual staining quality, generalization to unseen datasets, and robustness to content-preserving perturbations.
 
-<img src="https://junyanz.github.io/CycleGAN/images/teaser_high_res.jpg" width="800"/>
+---
 
-**Pix2pix:  [Project](https://phillipi.github.io/pix2pix/) |  [Paper](https://arxiv.org/pdf/1611.07004.pdf) |  [Torch](https://github.com/phillipi/pix2pix) |
-[Tensorflow Core Tutorial](https://www.tensorflow.org/tutorials/generative/pix2pix) | [PyTorch Colab](https://colab.research.google.com/github/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/pix2pix.ipynb)**
+## Method
 
-<img src="https://phillipi.github.io/pix2pix/images/teaser_v3.png" width="800px"/>
+### Problem Formulation
 
+Let
 
-**[EdgesCats Demo](https://affinelayer.com/pixsrv/) | [pix2pix-tensorflow](https://github.com/affinelayer/pix2pix-tensorflow) | by [Christopher Hesse](https://twitter.com/christophrhesse)**
+- $S$ denote the source image domain,
+- $T$ denote the target staining domain,
+- $X$ denote diagnosis-relevant information,
+- $C$ denote diagnosis-irrelevant information.
 
-<img src='imgs/edges2cats.jpg' width="400px"/>
+A conventional virtual staining model may learn a biased mapping:
 
-If you use this code for your research, please cite:
+$$
+G : S(X,C) \rightarrow T.
+$$
 
-Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks.<br>
-[Jun-Yan Zhu](https://www.cs.cmu.edu/~junyanz/)\*,  [Taesung Park](https://taesung.me/)\*, [Phillip Isola](https://people.eecs.berkeley.edu/~isola/), [Alexei A. Efros](https://people.eecs.berkeley.edu/~efros). In ICCV 2017. (* equal contributions) [[Bibtex]](https://junyanz.github.io/CycleGAN/CycleGAN.txt)
+The goal of our framework is to learn a more causal mapping that focuses on diagnosis-relevant information:
 
+$$
+G : X \rightarrow T.
+$$
 
-Image-to-Image Translation with Conditional Adversarial Networks.<br>
-[Phillip Isola](https://people.eecs.berkeley.edu/~isola), [Jun-Yan Zhu](https://www.cs.cmu.edu/~junyanz/), [Tinghui Zhou](https://people.eecs.berkeley.edu/~tinghuiz), [Alexei A. Efros](https://people.eecs.berkeley.edu/~efros). In CVPR 2017. [[Bibtex]](https://www.cs.cmu.edu/~junyanz/projects/pix2pix/pix2pix.bib)
+Instead of explicitly modeling every possible type of nuisance variation, we introduce the concept of a **confounder space**.
 
-## Talks and Course
-pix2pix slides: [keynote](http://efrosgans.eecs.berkeley.edu/CVPR18_slides/pix2pix.key) | [pdf](http://efrosgans.eecs.berkeley.edu/CVPR18_slides/pix2pix.pdf),
-CycleGAN slides: [pptx](http://efrosgans.eecs.berkeley.edu/CVPR18_slides/CycleGAN.pptx) | [pdf](http://efrosgans.eecs.berkeley.edu/CVPR18_slides/CycleGAN.pdf)
+Images with similar diagnosis-irrelevant characteristics are considered to belong to the same confounder space. Depending on the available metadata, confounder spaces can be defined according to factors such as staining characteristics, acquisition site, scanning equipment, or other shared processing conditions.
 
-CycleGAN course assignment [code](http://www.cs.toronto.edu/~rgrosse/courses/csc321_2018/assignments/a4-code.zip) and [handout](http://www.cs.toronto.edu/~rgrosse/courses/csc321_2018/assignments/a4-handout.pdf) designed by Prof. [Roger Grosse](http://www.cs.toronto.edu/~rgrosse/) for [CSC321](http://www.cs.toronto.edu/~rgrosse/courses/csc321_2018/) "Intro to Neural Networks and Machine Learning" at University of Toronto. Please contact the instructor if you would like to adopt it in your course.
+In the worst case, when explicit nuisance annotations are unavailable, the WSI identity can be used to define the confounder space. Images originating from the same WSI are treated as belonging to the same confounder space.
 
-## Colab Notebook
-TensorFlow Core CycleGAN Tutorial: [Google Colab](https://colab.research.google.com/github/tensorflow/docs/blob/master/site/en/tutorials/generative/cyclegan.ipynb) | [Code](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/generative/cyclegan.ipynb)
+### Confounder Space Classifier
 
-TensorFlow Core pix2pix Tutorial: [Google Colab](https://colab.research.google.com/github/tensorflow/docs/blob/master/site/en/tutorials/generative/pix2pix.ipynb) | [Code](https://github.com/tensorflow/docs/blob/master/site/en/tutorials/generative/pix2pix.ipynb)
+We construct positive and negative image pairs according to confounder-space membership.
 
-PyTorch Colab notebook: [CycleGAN](https://colab.research.google.com/github/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/CycleGAN.ipynb) and [pix2pix](https://colab.research.google.com/github/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/pix2pix.ipynb)
+- Images from the same confounder space form positive pairs.
+- Images from different confounder spaces form negative pairs.
+- Additional color transformations are used to increase the diversity of training pairs.
 
-ZeroCostDL4Mic Colab notebook: [CycleGAN](https://colab.research.google.com/github/HenriquesLab/ZeroCostDL4Mic/blob/master/Colab_notebooks_Beta/CycleGAN_ZeroCostDL4Mic.ipynb) and [pix2pix](https://colab.research.google.com/github/HenriquesLab/ZeroCostDL4Mic/blob/master/Colab_notebooks_Beta/pix2pix_ZeroCostDL4Mic.ipynb)
+A pairwise classifier is trained to estimate whether two target images belong to the same confounder space.
 
-## Other implementations
-### CycleGAN
-<p><a href="https://github.com/leehomyc/cyclegan-1"> [Tensorflow]</a> (by Harry Yang),
-<a href="https://github.com/architrathore/CycleGAN/">[Tensorflow]</a> (by Archit Rathore),
-<a href="https://github.com/vanhuyz/CycleGAN-TensorFlow">[Tensorflow]</a> (by Van Huy),
-<a href="https://github.com/XHUJOY/CycleGAN-tensorflow">[Tensorflow]</a> (by Xiaowei Hu),
-<a href="https://github.com/LynnHo/CycleGAN-Tensorflow-2"> [Tensorflow2]</a> (by Zhenliang He),
-<a href="https://github.com/luoxier/CycleGAN_Tensorlayer"> [TensorLayer1.0]</a> (by luoxier),
-<a href="https://github.com/tensorlayer/cyclegan"> [TensorLayer2.0]</a> (by zsdonghao),
-<a href="https://github.com/Aixile/chainer-cyclegan">[Chainer]</a> (by Yanghua Jin),
-<a href="https://github.com/yunjey/mnist-svhn-transfer">[Minimal PyTorch]</a> (by yunjey),
-<a href="https://github.com/Ldpe2G/DeepLearningForFun/tree/master/Mxnet-Scala/CycleGAN">[Mxnet]</a> (by Ldpe2G),
-<a href="https://github.com/tjwei/GANotebooks">[lasagne/Keras]</a> (by tjwei),
-<a href="https://github.com/simontomaskarlsson/CycleGAN-Keras">[Keras]</a> (by Simon Karlsson),
-<a href="https://github.com/Ldpe2G/DeepLearningForFun/tree/master/Oneflow-Python/CycleGAN">[OneFlow]</a> (by Ldpe2G)
-</p>
-</ul>
+The classifier consists of an image encoder and a similarity scorer and produces similarity and dissimilarity scores for image pairs.
 
-### pix2pix
-<p><a href="https://github.com/affinelayer/pix2pix-tensorflow"> [Tensorflow]</a> (by Christopher Hesse),
-<a href="https://github.com/Eyyub/tensorflow-pix2pix">[Tensorflow]</a> (by Eyyüb Sariu),
-<a href="https://github.com/datitran/face2face-demo"> [Tensorflow (face2face)]</a> (by Dat Tran),
-<a href="https://github.com/awjuliani/Pix2Pix-Film"> [Tensorflow (film)]</a> (by Arthur Juliani),
-<a href="https://github.com/kaonashi-tyc/zi2zi">[Tensorflow (zi2zi)]</a> (by Yuchen Tian),
-<a href="https://github.com/pfnet-research/chainer-pix2pix">[Chainer]</a> (by mattya),
-<a href="https://github.com/tjwei/GANotebooks">[tf/torch/keras/lasagne]</a> (by tjwei),
-<a href="https://github.com/taey16/pix2pixBEGAN.pytorch">[Pytorch]</a> (by taey16)
-</p>
-</ul>
+This classifier provides a mechanism to capture diagnosis-irrelevant information implicitly rather than requiring explicit annotations of every nuisance factor.
 
-## Prerequisites
-- Linux or macOS
-- Python 3
-- CPU or NVIDIA GPU + CUDA CuDNN
+### Causal Intervention
 
-## Getting Started
-### Installation
+After the confounder space classifier has been trained, it is frozen and incorporated into the virtual staining training process.
 
-- Clone this repo:
-```bash
-git clone https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix
-cd pytorch-CycleGAN-and-pix2pix
-```
+For an input source image $s_i$, the virtual staining model generates a target image:
 
-- Install [PyTorch](http://pytorch.org) and 0.4+ and other dependencies (e.g., torchvision, [visdom](https://github.com/facebookresearch/visdom) and [dominate](https://github.com/Knio/dominate)).
-  - For pip users, please type the command `pip install -r requirements.txt`.
-  - For Conda users, you can create a new Conda environment using `conda env create -f environment.yml`.
-  - For Docker users, we provide the pre-built Docker image and Dockerfile. Please refer to our [Docker](docs/docker.md) page.
-  - For Repl users, please click [![Run on Repl.it](https://repl.it/badge/github/junyanz/pytorch-CycleGAN-and-pix2pix)](https://repl.it/github/junyanz/pytorch-CycleGAN-and-pix2pix).
+$$
+\hat{t}_i = G(s_i).
+$$
 
-### CycleGAN train/test
-- Download a CycleGAN dataset (e.g. maps):
-```bash
-bash ./datasets/download_cyclegan_dataset.sh maps
-```
-- To view training results and loss plots, run `python -m visdom.server` and click the URL http://localhost:8097.
-- To log training progress and test images to W&B dashboard, set the `--use_wandb` flag with train and test script
-- Train a model:
-```bash
-#!./scripts/train_cyclegan.sh
-python train.py --dataroot ./datasets/maps --name maps_cyclegan --model cycle_gan
-```
-To see more intermediate results, check out `./checkpoints/maps_cyclegan/web/index.html`.
-- Test the model:
-```bash
-#!./scripts/test_cyclegan.sh
-python test.py --dataroot ./datasets/maps --name maps_cyclegan --model cycle_gan
-```
-- The test results will be saved to a html file here: `./results/maps_cyclegan/latest_test/index.html`.
+The generated images are then evaluated by the frozen confounder space classifier. The virtual staining model is optimized so that the generated outputs become less distinguishable according to their confounder-space information.
 
-### pix2pix train/test
-- Download a pix2pix dataset (e.g.[facades](http://cmp.felk.cvut.cz/~tylecr1/facade/)):
-```bash
-bash ./datasets/download_pix2pix_dataset.sh facades
-```
-- To view training results and loss plots, run `python -m visdom.server` and click the URL http://localhost:8097.
-- To log training progress and test images to W&B dashboard, set the `--use_wandb` flag with train and test script
-- Train a model:
-```bash
-#!./scripts/train_pix2pix.sh
-python train.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --direction BtoA
-```
-To see more intermediate results, check out  `./checkpoints/facades_pix2pix/web/index.html`.
+In this way, the generated images are encouraged to suppress diagnosis-irrelevant features while preserving the information required for the staining transformation.
 
-- Test the model (`bash ./scripts/test_pix2pix.sh`):
-```bash
-#!./scripts/test_pix2pix.sh
-python test.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --direction BtoA
-```
-- The test results will be saved to a html file here: `./results/facades_pix2pix/test_latest/index.html`. You can find more scripts at `scripts` directory.
-- To train and test pix2pix-based colorization models, please add `--model colorization` and `--dataset_mode colorization`. See our training [tips](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/tips.md#notes-on-colorization) for more details.
+To improve computational efficiency and pair diversity, we further introduce a **queue dictionary** that stores generated target images and dynamically updates its contents during training.
 
-### Apply a pre-trained model (CycleGAN)
-- You can download a pretrained model (e.g. horse2zebra) with the following script:
-```bash
-bash ./scripts/download_cyclegan_model.sh horse2zebra
-```
-- The pretrained model is saved at `./checkpoints/{name}_pretrained/latest_net_G.pth`. Check [here](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/scripts/download_cyclegan_model.sh#L3) for all the available CycleGAN models.
-- To test the model, you also need to download the  horse2zebra dataset:
-```bash
-bash ./datasets/download_cyclegan_dataset.sh horse2zebra
-```
+---
 
-- Then generate the results using
-```bash
-python test.py --dataroot datasets/horse2zebra/testA --name horse2zebra_pretrained --model test --no_dropout
-```
-- The option `--model test` is used for generating results of CycleGAN only for one side. This option will automatically set `--dataset_mode single`, which only loads the images from one set. On the contrary, using `--model cycle_gan` requires loading and generating results in both directions, which is sometimes unnecessary. The results will be saved at `./results/`. Use `--results_dir {directory_path_to_save_result}` to specify the results directory.
+## Framework
 
-- For pix2pix and your own models, you need to explicitly specify `--netG`, `--norm`, `--no_dropout` to match the generator architecture of the trained model. See this [FAQ](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md#runtimeerror-errors-in-loading-state_dict-812-671461-296) for more details.
+The overall training procedure consists of two main stages:
 
-### Apply a pre-trained model (pix2pix)
-Download a pre-trained model with `./scripts/download_pix2pix_model.sh`.
+### Stage 1: Confounder Space Classifier
 
-- Check [here](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/scripts/download_pix2pix_model.sh#L3) for all the available pix2pix models. For example, if you would like to download label2photo model on the Facades dataset,
-```bash
-bash ./scripts/download_pix2pix_model.sh facades_label2photo
-```
-- Download the pix2pix facades datasets:
-```bash
-bash ./datasets/download_pix2pix_dataset.sh facades
-```
-- Then generate the results using
-```bash
-python test.py --dataroot ./datasets/facades/ --direction BtoA --model pix2pix --name facades_label2photo_pretrained
-```
-- Note that we specified `--direction BtoA` as Facades dataset's A to B direction is photos to labels.
+1. Construct image pairs according to confounder-space membership.
+2. Apply color transformations to improve pair diversity.
+3. Train a pairwise confounder-space classifier.
+4. Learn representations that capture diagnosis-irrelevant information.
 
-- If you would like to apply a pre-trained model to a collection of input images (rather than image pairs), please use `--model test` option. See `./scripts/test_single.sh` for how to apply a model to Facade label maps (stored in the directory `facades/testB`).
+### Stage 2: Causal Intervention
 
-- See a list of currently available models at `./scripts/download_pix2pix_model.sh`
+1. Train the virtual staining model with its original objective.
+2. After the warm-up stage, freeze the confounder space classifier.
+3. Generate target images using the virtual staining model.
+4. Compare generated images using the frozen confounder classifier.
+5. Optimize the virtual staining model to suppress confounder-related information.
+6. Use a queue dictionary to improve computational efficiency and pair diversity.
 
-## [Docker](docs/docker.md)
-We provide the pre-built Docker image and Dockerfile that can run this code repo. See [docker](docs/docker.md).
+The resulting framework can be integrated with different supervised virtual staining architectures.
 
-## [Datasets](docs/datasets.md)
-Download pix2pix/CycleGAN datasets and create your own datasets.
+---
 
-## [Training/Test Tips](docs/tips.md)
-Best practice for training and testing your models.
+## Supported Tasks
 
-## [Frequently Asked Questions](docs/qa.md)
-Before you post a new question, please first look at the above Q & A and existing GitHub issues.
+We evaluate the framework on two virtual staining tasks.
 
-## Custom Model and Dataset
-If you plan to implement custom models and dataset for your new applications, we provide a dataset [template](data/template_dataset.py) and a model [template](models/template_model.py) as a starting point.
+### H&E-to-IHC
 
-## [Code structure](docs/overview.md)
-To help users better understand and use our code, we briefly overview the functionality and implementation of each package and each module.
+The H&E-to-IHC experiments focus on HER2 staining and scoring.
 
-## Pull Request
-You are always welcome to contribute to this repository by sending a [pull request](https://help.github.com/articles/about-pull-requests/).
-Please run `flake8 --ignore E501 .` and `python ./scripts/test_before_push.py` before you commit the code. Please also update the code structure [overview](docs/overview.md) accordingly if you add or remove files.
+The datasets include:
 
-## Citation
-If you use this code for your research, please cite our papers.
-```
-@inproceedings{CycleGAN2017,
-  title={Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks},
-  author={Zhu, Jun-Yan and Park, Taesung and Isola, Phillip and Efros, Alexei A},
-  booktitle={Computer Vision (ICCV), 2017 IEEE International Conference on},
-  year={2017}
-}
+- **BCI**
+- **MIST-HER2**
+- **self-HER2**
 
+The self-HER2 dataset contains 3,206 accurately aligned H&E/IHC image pairs from 30 pairs of whole-slide images and covers the HER2 scoring categories:
 
-@inproceedings{isola2017image,
-  title={Image-to-Image Translation with Conditional Adversarial Networks},
-  author={Isola, Phillip and Zhu, Jun-Yan and Zhou, Tinghui and Efros, Alexei A},
-  booktitle={Computer Vision and Pattern Recognition (CVPR), 2017 IEEE Conference on},
-  year={2017}
-}
-```
+- 0
+- 1+
+- 2+
+- 3+
 
-## Other Languages
-[Spanish](docs/README_es.md)
+Image patches are extracted at 20× magnification with a resolution of $1024 \times 1024$ pixels.
 
-## Related Projects
-**[contrastive-unpaired-translation](https://github.com/taesungp/contrastive-unpaired-translation) (CUT)**<br>
-**[CycleGAN-Torch](https://github.com/junyanz/CycleGAN) |
-[pix2pix-Torch](https://github.com/phillipi/pix2pix) | [pix2pixHD](https://github.com/NVIDIA/pix2pixHD)|
-[BicycleGAN](https://github.com/junyanz/BicycleGAN) | [vid2vid](https://tcwang0509.github.io/vid2vid/) | [SPADE/GauGAN](https://github.com/NVlabs/SPADE)**<br>
-**[iGAN](https://github.com/junyanz/iGAN) | [GAN Dissection](https://github.com/CSAILVision/GANDissect) | [GAN Paint](http://ganpaint.io/)**
+### FFPE-to-H&E
 
-## Cat Paper Collection
-If you love cats, and love reading cool graphics, vision, and learning papers, please check out the Cat Paper [Collection](https://github.com/junyanz/CatPapers).
+The FFPE-to-H&E experiments include:
 
-## Acknowledgments
-Our code is inspired by [pytorch-DCGAN](https://github.com/pytorch/examples/tree/master/dcgan).
+- **self-FFPE1**
+- **self-FFPE2**
+
+The two datasets were independently collected following nearly identical processing protocols, with different source institutions. FFPE and H&E images are strictly registered, and image patches are extracted at 40× magnification.
+
+---
+
+## Datasets
+
+The datasets used in the experiments are summarized below.
+
+| Dataset | Task | Train | Test | Public |
+| --- | --- | ---: | ---: | :---: |
+| BCI | H&E-to-IHC | - | 977 | ✓ |
+| MIST-HER2 | H&E-to-IHC | 4642 | 998 | ✓ |
+| self-HER2 | H&E-to-IHC | 2632 | 574 | ✗ |
+| self-FFPE1 | FFPE-to-H&E | 4232 | 1075 | ✗ |
+| self-FFPE2 | FFPE-to-H&E | - | 1398 | ✗ |
+
+The train/test numbers above describe how the datasets are used in our experiments and do not necessarily indicate the original dataset partitioning.
+
+### Data Availability
+
+The public datasets should be downloaded from their respective publications.
+
+The private datasets (`self-HER2`, `self-FFPE1`, and `self-FFPE2`) are not distributed with this repository.
+
+Please make sure that you have the corresponding permissions and licenses before using any dataset.
+
+---
+
+## Baseline Models
+
+We use two representative supervised virtual staining models as the base architectures:
+
+- **Pix2Pix**
+- **Pix2PixHD**
+
+The proposed causal intervention framework is designed to be model-agnostic and can be incorporated into existing virtual staining models.
+
+The experiments compare:
+
+- Baseline model
+- Baseline model + our causal intervention framework
+
+---
+
+## Evaluation
+
+We evaluate the generated images using two groups of metrics.
+
+### Image Quality Metrics
+
+The following metrics measure pixel-level fidelity:
+
+- **PSNR** ↑
+- **SSIM** ↑
+- **MS-SSIM** ↑
+
+Higher values indicate better performance.
+
+### Feature-Based Metrics
+
+The following metrics evaluate perceptual and semantic differences using deep feature representations:
+
+- **FID** ↓
+- **KID** ↓
+- **DISTS** ↓
+
+Lower values indicate better performance.
+
+---
+
+## Experimental Settings
+
+The implementation is based on **PyTorch 2.0.1**.
+
+The experiments were conducted on workstations equipped with:
+
+- 8 × NVIDIA RTX 3090
+- 24 GB GPU memory per GPU
+
+For the confounder-space classifier, we use:
+
+- **Backbone:** ResNet-18
+- **Training pairs:** 50,000 image pairs
+- **Dictionary length:** approximately 5% of the training set
+- **Warm-up:** 60 epochs
+- **Causal intervention:** activated after the warm-up stage
+
+The loss weight for suppressing diagnosis-irrelevant features is set according to the experimental configuration described in the paper.
+
+---
+
+## Repository Structure
+
+The repository is organized as follows:
+
+```text
+Causal-Virtual-Staining/
+│
+├── data/
+│   └── ...
+│
+├── models/
+│   └── ...
+│
+├── options/
+│   └── ...
+│
+├── scripts/
+│   └── ...
+│
+├── util/
+│   └── ...
+│
+├── docs/
+│   └── ...
+│
+├── imgs/
+│   └── ...
+│
+├── train.py
+├── test.py
+├── environment.yml
+├── LICENSE
+└── README.md
