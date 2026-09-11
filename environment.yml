@@ -1,0 +1,19 @@
+name: pytorch-CycleGAN-and-pix2pix
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - python=3.8
+  - pytorch=2.0.1
+  - torchvision=0.15.2
+  - cudatoolkit=11.8
+  - scipy
+  - pip
+  - pip:
+      - wandb==0.12.18
+      - visdom==0.1.8
+      - dominate==2.6.0
+      - Pillow==8.0.1
+      - numpy==1.19.2
+

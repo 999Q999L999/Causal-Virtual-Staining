@@ -1,0 +1,10 @@
+2024-10-30 01:15:59,093 - simclr_custom -  model type: resnet18, out_dim: 512
+2024-10-30 01:22:30,607 - simclr_custom -  Train:50000, Test:5000
+2024-10-30 01:22:30,609 - simclr_custom -  --------------Epoch: 0--------------
+2024-10-30 01:24:01,359 - simclr_custom -  model type: resnet18, out_dim: 512
+2024-10-30 01:30:08,533 - simclr_custom -  Train:50000, Test:5000
+2024-10-30 01:30:08,534 - simclr_custom -  --------------Epoch: 0--------------
+2024-10-30 08:27:25,379 - simclr_custom -  model type: resnet18, out_dim: 512
+2024-10-30 08:33:36,726 - simclr_custom -  Train:50000, Test:5000
+2024-10-30 08:33:36,727 - simclr_custom -  --------------Epoch: 0--------------
+2024-10-30 10:24:02,386 - simclr_custom -  model type: resnet18, out_dim: 512

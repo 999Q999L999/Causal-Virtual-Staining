@@ -1,0 +1,68 @@
+2024-11-04 20:50:56,673 - simclr_custom -  model type: resnet18, out_dim: 512
+2024-11-04 20:51:04,824 - simclr_custom -  Train:50000, Test:5000
+2024-11-04 20:51:04,824 - simclr_custom -  --------------Epoch: 0--------------
+2024-11-04 21:30:25,583 - simclr_custom -  train loss: 0.11965661, train_acc: 0.7985, train_f1: 0.7976, train_auc: 0.8675
+2024-11-04 21:34:07,223 - simclr_custom -  val loss: 0.38474363, val_acc: 0.8902, val_f1: 0.8899, val_auc: 0.9497
+2024-11-04 21:34:07,223 - simclr_custom -  save model
+2024-11-04 21:34:07,325 - simclr_custom -  --------------Epoch: 1--------------
+2024-11-04 22:11:44,811 - simclr_custom -  train loss: 0.10036205, train_acc: 0.8712, train_f1: 0.8707, train_auc: 0.9318
+2024-11-04 22:15:27,994 - simclr_custom -  val loss: 0.37363470, val_acc: 0.8958, val_f1: 0.8954, val_auc: 0.9548
+2024-11-04 22:15:27,995 - simclr_custom -  save model
+2024-11-04 22:15:28,881 - simclr_custom -  --------------Epoch: 2--------------
+2024-11-04 22:53:17,701 - simclr_custom -  train loss: 0.09456725, train_acc: 0.8975, train_f1: 0.8972, train_auc: 0.9495
+2024-11-04 22:57:05,520 - simclr_custom -  val loss: 0.37010632, val_acc: 0.9060, val_f1: 0.9060, val_auc: 0.9568
+2024-11-04 22:57:05,520 - simclr_custom -  save model
+2024-11-04 22:57:06,165 - simclr_custom -  --------------Epoch: 3--------------
+2024-11-04 23:35:58,741 - simclr_custom -  train loss: 0.09080975, train_acc: 0.9131, train_f1: 0.9130, train_auc: 0.9591
+2024-11-04 23:40:05,223 - simclr_custom -  val loss: 0.34610146, val_acc: 0.9304, val_f1: 0.9303, val_auc: 0.9706
+2024-11-04 23:40:05,223 - simclr_custom -  save model
+2024-11-04 23:40:05,558 - simclr_custom -  --------------Epoch: 4--------------
+2024-11-05 00:21:43,511 - simclr_custom -  train loss: 0.08833489, train_acc: 0.9215, train_f1: 0.9214, train_auc: 0.9645
+2024-11-05 00:25:46,828 - simclr_custom -  val loss: 0.33828711, val_acc: 0.9370, val_f1: 0.9369, val_auc: 0.9719
+2024-11-05 00:25:46,828 - simclr_custom -  save model
+2024-11-05 00:25:47,112 - simclr_custom -  --------------Epoch: 5--------------
+2024-11-05 01:03:29,684 - simclr_custom -  train loss: 0.08643679, train_acc: 0.9287, train_f1: 0.9287, train_auc: 0.9658
+2024-11-05 01:07:13,854 - simclr_custom -  val loss: 0.34057360, val_acc: 0.9372, val_f1: 0.9371, val_auc: 0.9716
+2024-11-05 01:07:13,854 - simclr_custom -  save model
+2024-11-05 01:07:14,354 - simclr_custom -  --------------Epoch: 6--------------
+2024-11-05 01:46:10,607 - simclr_custom -  train loss: 0.08580645, train_acc: 0.9315, train_f1: 0.9315, train_auc: 0.9671
+2024-11-05 01:49:57,394 - simclr_custom -  val loss: 0.35219346, val_acc: 0.9228, val_f1: 0.9226, val_auc: 0.9652
+2024-11-05 01:49:57,396 - simclr_custom -  --------------Epoch: 7--------------
+2024-11-05 02:29:10,093 - simclr_custom -  train loss: 0.08494999, train_acc: 0.9335, train_f1: 0.9334, train_auc: 0.9682
+2024-11-05 02:32:50,086 - simclr_custom -  val loss: 0.36354885, val_acc: 0.9154, val_f1: 0.9153, val_auc: 0.9594
+2024-11-05 02:32:50,088 - simclr_custom -  --------------Epoch: 8--------------
+2024-11-05 03:11:37,075 - simclr_custom -  train loss: 0.08420163, train_acc: 0.9374, train_f1: 0.9373, train_auc: 0.9684
+2024-11-05 03:15:36,923 - simclr_custom -  val loss: 0.35069334, val_acc: 0.9336, val_f1: 0.9335, val_auc: 0.9549
+2024-11-05 03:15:36,925 - simclr_custom -  --------------Epoch: 9--------------
+2024-11-05 03:54:32,960 - simclr_custom -  train loss: 0.08362963, train_acc: 0.9388, train_f1: 0.9387, train_auc: 0.9693
+2024-11-05 03:58:31,221 - simclr_custom -  val loss: 0.37178630, val_acc: 0.8994, val_f1: 0.8989, val_auc: 0.9635
+2024-11-05 03:58:31,223 - simclr_custom -  --------------Epoch: 10--------------
+2024-11-05 04:37:26,684 - simclr_custom -  train loss: 0.08314406, train_acc: 0.9409, train_f1: 0.9408, train_auc: 0.9696
+2024-11-05 04:41:17,797 - simclr_custom -  val loss: 0.33139752, val_acc: 0.9450, val_f1: 0.9449, val_auc: 0.9734
+2024-11-05 04:41:17,797 - simclr_custom -  save model
+2024-11-05 04:41:18,028 - simclr_custom -  --------------Epoch: 11--------------
+2024-11-05 05:22:45,606 - simclr_custom -  train loss: 0.08255236, train_acc: 0.9444, train_f1: 0.9443, train_auc: 0.9716
+2024-11-05 05:26:31,260 - simclr_custom -  val loss: 0.33537802, val_acc: 0.9428, val_f1: 0.9428, val_auc: 0.9688
+2024-11-05 05:26:31,263 - simclr_custom -  --------------Epoch: 12--------------
+2024-11-05 06:04:26,073 - simclr_custom -  train loss: 0.08230500, train_acc: 0.9468, train_f1: 0.9467, train_auc: 0.9715
+2024-11-05 06:08:12,117 - simclr_custom -  val loss: 0.33665392, val_acc: 0.9430, val_f1: 0.9429, val_auc: 0.9742
+2024-11-05 06:08:12,119 - simclr_custom -  --------------Epoch: 13--------------
+2024-11-05 06:45:58,853 - simclr_custom -  train loss: 0.08150455, train_acc: 0.9513, train_f1: 0.9512, train_auc: 0.9714
+2024-11-05 06:49:47,911 - simclr_custom -  val loss: 0.33812457, val_acc: 0.9326, val_f1: 0.9326, val_auc: 0.9725
+2024-11-05 06:49:47,913 - simclr_custom -  --------------Epoch: 14--------------
+2024-11-05 07:27:38,814 - simclr_custom -  train loss: 0.08151425, train_acc: 0.9510, train_f1: 0.9510, train_auc: 0.9722
+2024-11-05 07:31:19,871 - simclr_custom -  val loss: 0.36329607, val_acc: 0.9152, val_f1: 0.9152, val_auc: 0.9575
+2024-11-05 07:31:19,873 - simclr_custom -  --------------Epoch: 15--------------
+2024-11-05 08:09:07,705 - simclr_custom -  train loss: 0.08137386, train_acc: 0.9521, train_f1: 0.9521, train_auc: 0.9715
+2024-11-05 08:12:53,241 - simclr_custom -  val loss: 0.32360650, val_acc: 0.9556, val_f1: 0.9556, val_auc: 0.9728
+2024-11-05 08:12:53,241 - simclr_custom -  save model
+2024-11-05 08:12:53,758 - simclr_custom -  --------------Epoch: 16--------------
+2024-11-05 08:50:45,002 - simclr_custom -  train loss: 0.08085664, train_acc: 0.9540, train_f1: 0.9540, train_auc: 0.9739
+2024-11-05 08:54:36,121 - simclr_custom -  val loss: 0.32336793, val_acc: 0.9534, val_f1: 0.9534, val_auc: 0.9745
+2024-11-05 08:54:36,123 - simclr_custom -  --------------Epoch: 17--------------
+2024-11-05 09:32:31,536 - simclr_custom -  train loss: 0.08070372, train_acc: 0.9546, train_f1: 0.9545, train_auc: 0.9721
+2024-11-05 09:36:22,020 - simclr_custom -  val loss: 0.34103239, val_acc: 0.9338, val_f1: 0.9336, val_auc: 0.9702
+2024-11-05 09:36:22,021 - simclr_custom -  --------------Epoch: 18--------------
+2024-11-05 10:15:11,440 - simclr_custom -  train loss: 0.08039162, train_acc: 0.9556, train_f1: 0.9556, train_auc: 0.9730
+2024-11-05 10:19:03,720 - simclr_custom -  val loss: 0.33114734, val_acc: 0.9524, val_f1: 0.9524, val_auc: 0.9689
+2024-11-05 10:19:03,722 - simclr_custom -  --------------Epoch: 19--------------
